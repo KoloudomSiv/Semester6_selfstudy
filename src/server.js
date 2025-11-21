@@ -1,12 +1,18 @@
 import express from 'express';
-import { StatusCodes } from 'http-status-codes';
+import userRoute from './users.routes.js';
+import mainRoute from './main.routes.js';
+import helmet from 'helmet';
 const app = express();
 const port = 3000;
-//localhost:3000
-app.get('/hello', (req,res)=>{
-    res.status(StatusCodes.CREATED); //hhtp status code 201
-    res.send('Hello bitch!!');
-})
+
+
+app.use(express.json());
+app.use(helmet());
+
+app.use('v1', mainRoute);
+app.use('/v1/user', userRoute);
+
+
 app.listen(port,()=>{
     console.log(`Server is running on page http://localhost:${port}`)
-})
+});
