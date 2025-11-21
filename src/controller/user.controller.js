@@ -1,7 +1,7 @@
 
 import userService from "../services/user.service.js" ;
 import {StatusCodes} from 'http-status-codes';
-
+import pino from 'pino';
 const STATUS = {
     status: 'OK',
     failure: 'NO'
@@ -24,6 +24,7 @@ const getAllUsers=  (req,res)=>{
 const getUser = (req,res)=>{
     const id = parseInt(req.params.id,10);
     const user = userService.getUser(id);
+    pino().info(`Creating user`);
     if (user){
         return res.status(StatusCodes.OK).send(
             {
