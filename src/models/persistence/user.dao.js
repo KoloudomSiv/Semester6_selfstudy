@@ -1,56 +1,80 @@
-import users from '../data/user.data.js';
+import User from '../user.model.js';
+import mongoose from 'mongoose';
 
-const get = (userId)=> users.find((user)=>user.id === userId);
-
-
-const getAll =()=>users;
-
-
-const update = (userId, newDetails)=>{
-    let existingUser = null;
-    let userIndex;
-
-    users.map((user, index) =>{
-        if (user.id === userId){
-            existingUser = user;
-            userIndex = index;
+const get = async (userId) => {
+    try {
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            throw new Error('Invalid user ID format');
         }
-    });
-
-    if (!existingUser){
-        return null;
+        const user = await User.findById(userId);
+        return user;
+    } catch (error) {
+        throw new Error(`Error fetching user: ${error.message}`);
     }
-    //
-    const updatedUser = {
-        ...existingUser,
-        ...newDetails
-    };
-    users.splice(userIndex,1,updatedUser);
-    return updatedUser;
-}
+};
 
-const insert = (details)=>{
-    const newUser = {id:users.length + 1,...details};
-    users.push(newUser);
-    return newUser;
-}
-
-
-
-const remove = (userId) => {
-    const index = users.findIndex(user => user.id === userId);
-    if (index !== -1) {
-        users.splice(index, 1);
-        return true; // Successfully removed
+const getAll = async () => {
+    try {
+        const users = await User.find({});
+        return users;
+    } catch (error) {
+        throw new Error(`Error fetching all users: ${error.message}`);
     }
-    return false; // User not found
-}
+};
 
+const update = async (userId, newDetails) => {
+    try {
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            throw new Error('Invalid user ID format');
+        }
+        const updatedUser = await User.findByIdAndUpdate(
+            userId,
+            newDetails,
+            { new: true, runValidators: true }
+        );
+        return updatedUser;
+    } catch (error) {
+        if (error.name === 'ValidationError') {
+            const messages = Object.values(error.errors).map(err => err.message).join(', ');
+            throw new Error(`Validation error: ${messages}`);
+        }
+        throw new Error(`Error updating user: ${error.message}`);
+    }
+};
 
-export default{
+const insert = async (details) => {
+    try {
+        const newUser = new User(details);
+        await newUser.save();
+        return newUser;
+    } catch (error) {
+        if (error.name === 'ValidationError') {
+            const messages = Object.values(error.errors).map(err => err.message).join(', ');
+            throw new Error(`Validation error: ${messages}`);
+        }
+        if (error.code === 11000) {
+            throw new Error('Email already exists');
+        }
+        throw new Error(`Error creating user: ${error.message}`);
+    }
+};
+
+const remove = async (userId) => {
+    try {
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            throw new Error('Invalid user ID format');
+        }
+        const result = await User.findByIdAndDelete(userId);
+        return result !== null;
+    } catch (error) {
+        throw new Error(`Error deleting user: ${error.message}`);
+    }
+};
+
+export default {
     get,
     getAll,
     update,
     remove,
     insert,
-}
+};

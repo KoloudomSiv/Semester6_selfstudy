@@ -1,30 +1,30 @@
 import userDao from '../models/persistence/user.dao.js';
 
 
-const  getUser =(userId)=>{
-    return userDao.get(userId);
-}
+const getUser = async (userId) => {
+    return await userDao.get(userId);
+};
 
-const  getAllUsers =(userId)=>{
-    return userDao.getAll();
-}
+const getAllUsers = async () => {
+    return await userDao.getAll();
+};
 
-const updateUser = (userId, details)=>{
-    return userDao.update(userId, details)
-}
+const updateUser = async (userId, details) => {
+    return await userDao.update(userId, details);
+};
 
-const  addUser =(details)=>{
-    return userDao.insert(details);
-}
+const addUser = async (details) => {
+    return await userDao.insert(details);
+};
 
-const removeUser = (userId)=>{
-    userDao.remove(userId);
-}
+const removeUser = async (userId) => {
+    return await userDao.remove(userId);
+};
 
-export default{
+export default {
     getUser,
     getAllUsers,
     addUser,
     updateUser,
     removeUser,
-}
+};
